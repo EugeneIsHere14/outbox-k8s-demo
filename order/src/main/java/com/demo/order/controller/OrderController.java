@@ -2,6 +2,7 @@ package com.demo.order.controller;
 
 import com.demo.order.dto.OrderDto;
 import com.demo.order.service.OrderService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,8 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderDto createOrder(@RequestBody OrderDto orderDto) {
-        return orderService.createOrder(orderDto);
+    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderDto orderDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderDto));
     }
 
     @GetMapping("/{id}")

@@ -2,11 +2,6 @@ spring:
   application:
     name: order
 
-  datasource:
-    url: jdbc:mysql://mysql:3306/orders
-    username: user
-    password: pass
-
   sql:
     init:
       mode: always

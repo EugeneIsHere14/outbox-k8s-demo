@@ -18,5 +18,5 @@ CREATE TABLE outbox_events (
     event_id VARCHAR(255) NOT NULL,
     event_type VARCHAR(100) NOT NULL,
     payload TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
