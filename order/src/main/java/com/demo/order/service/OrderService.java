@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,11 +39,9 @@ public class OrderService {
         return new OrderDto(saved.getId(), orderDto.customerName(), orderDto.amount(), saved.getStatus());
     }
 
-    public OrderDto getOrderById(Long id) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        return new OrderDto(order.getId(), order.getCustomerName(), order.getAmount(), order.getStatus());
+    public Optional<OrderDto> getOrderById(Long id) {
+        return orderRepository.findById(id)
+                .map(order -> new OrderDto(order.getId(), order.getCustomerName(), order.getAmount(), order.getStatus()));
     }
 
     private void saveOutboxEvent(Order order, OrderEventType eventType) {
