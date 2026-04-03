@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-postgres
+  template:
+    metadata:
+      labels:
+        app: payments-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+
+          env:
+            - name: POSTGRES_DB
+              value: payments
+            - name: POSTGRES_USER
+              value: user
+            - name: POSTGRES_PASSWORD
+              value: pass
+
+          args:
+            - "-c"
+            - "config_file=/etc/postgresql/postgresql.conf"
+
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-config
+              mountPath: /etc/postgresql/postgresql.conf
+              subPath: postgresql.conf
+
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: payments-postgres-pvc
+        - name: postgres-config
+          configMap:
+            name: payments-postgres-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: payments-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payments-postgres-config
+data:
+  postgresql.conf: |
+    listen_addresses = '*'
+    wal_level = logical
+    max_wal_senders = 10
+    max_replication_slots = 10
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: payments-postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Mi

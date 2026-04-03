@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-mysql
+  template:
+    metadata:
+      labels:
+        app: orders-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+
+          env:
+            - name: MYSQL_DATABASE
+              value: orders
+            - name: MYSQL_USER
+              value: user
+            - name: MYSQL_PASSWORD
+              value: pass
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-config
+              mountPath: /etc/mysql/conf.d
+
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: orders-mysql-pvc
+        - name: mysql-config
+          configMap:
+            name: orders-mysql-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-mysql
+spec:
+  type: ClusterIP
+  selector:
+    app: orders-mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-mysql-config
+data:
+  my.cnf: |
+    [mysqld]
+    server-id=1
+    log-bin=mysql-bin
+    binlog_format=ROW
+    binlog_row_image=FULL
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: orders-mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Mi
