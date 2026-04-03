@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3316/payments
+    username: user
+    password: pass
+
+server:
+  port: 8081

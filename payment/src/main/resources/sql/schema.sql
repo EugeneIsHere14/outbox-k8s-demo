@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS payments;
 -- Create payments table
 CREATE TABLE payments (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    order_id BIGINT NOT NULL,
+    order_id BIGINT NOT NULL UNIQUE,
     amount DECIMAL(19,2) NOT NULL,
     status VARCHAR(50) NOT NULL
 );
