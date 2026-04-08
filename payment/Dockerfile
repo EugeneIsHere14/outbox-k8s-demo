@@ -1,5 +1,5 @@
 # Starting with a base image containing Java runtime
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-jammy
 
 # Metadata
 LABEL maintainer="com.demo" version="1.0" description="Payment Service Application"
