@@ -19,5 +19,4 @@ spec:
               /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic connect-configs --partitions 1 --replication-factor 1 --config cleanup.policy=compact
               /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic connect-offsets --partitions 1 --replication-factor 1 --config cleanup.policy=compact
               /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic connect-status --partitions 1 --replication-factor 1 --config cleanup.policy=compact
-              /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic schemahistory.orders --partitions 1 --replication-factor 1 --config cleanup.policy=compact
               /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic order-events --partitions 1 --replication-factor 1
