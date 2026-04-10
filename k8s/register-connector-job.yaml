@@ -1,0 +1,92 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: register-order-outbox-connector
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: register-connector
+          image: curlimages/curl:8.12.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+
+              CONNECT_URL="http://kafka-connect:8083"
+              CONNECTOR_NAME="order-outbox-connector"
+
+              echo "=== Waiting for Kafka Connect ==="
+              until curl -fsS "${CONNECT_URL}/" > /dev/null; do
+                echo "Kafka Connect is not ready yet..."
+                sleep 5
+              done
+              echo "Kafka Connect is ready"
+
+              echo "=== Checking mounted config ==="
+              ls -la /config
+              test -f /config/connector.json
+
+              echo "=== connector.json content ==="
+              cat /config/connector.json
+              echo
+
+              echo "=== Existing connectors before upsert ==="
+              curl -sS "${CONNECT_URL}/connectors" || true
+              echo
+
+              echo "=== Upserting connector config ==="
+              HTTP_CODE=$(curl -sS -o /tmp/put-response.txt -w "%{http_code}" \
+                -X PUT \
+                -H "Accept: application/json" \
+                -H "Content-Type: application/json" \
+                "${CONNECT_URL}/connectors/${CONNECTOR_NAME}/config" \
+                --data-binary @/config/connector.json || true)
+
+              echo "PUT HTTP code: ${HTTP_CODE}"
+              echo "PUT response body:"
+              cat /tmp/put-response.txt || true
+              echo
+
+              if [ "${HTTP_CODE}" != "200" ] && [ "${HTTP_CODE}" != "201" ]; then
+                echo "Connector upsert failed"
+                exit 1
+              fi
+
+              echo "=== Existing connectors after upsert ==="
+              curl -sS "${CONNECT_URL}/connectors" || true
+              echo
+
+              echo "=== Waiting for connector status ==="
+              i=0
+              while [ $i -lt 20 ]; do
+                STATUS_CODE=$(curl -sS -o /tmp/status-response.txt -w "%{http_code}" \
+                  "${CONNECT_URL}/connectors/${CONNECTOR_NAME}/status" || true)
+
+                echo "Status HTTP code: ${STATUS_CODE}"
+                echo "Status response body:"
+                cat /tmp/status-response.txt || true
+                echo
+
+                if [ "${STATUS_CODE}" = "200" ]; then
+                  echo "Connector status became available"
+                  exit 0
+                fi
+
+                i=$((i + 1))
+                echo "Status not ready yet, retry ${i}/20..."
+                sleep 3
+              done
+
+              echo "Connector status was not available in time"
+              exit 1
+          volumeMounts:
+            - name: connector-config
+              mountPath: /config
+      volumes:
+        - name: connector-config
+          configMap:
+            name: debezium-order-mysql-connector
