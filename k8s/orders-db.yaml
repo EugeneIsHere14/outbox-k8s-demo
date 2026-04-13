@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: orders-mysql
 spec:
+  # Using Recreate strategy to avoid issues with multiple MySQL instances trying to access the same data volume
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -20,13 +23,25 @@ spec:
 
           env:
             - name: MYSQL_DATABASE
-              value: orders
+              valueFrom:
+                configMapKeyRef:
+                  name: orders-db-config
+                  key: DB_NAME
             - name: MYSQL_USER
-              value: user
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_USERNAME
             - name: MYSQL_PASSWORD
-              value: pass
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_PASSWORD
             - name: MYSQL_ROOT_PASSWORD
-              value: root
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_ROOT_PASSWORD
 
           volumeMounts:
             - name: mysql-data
@@ -81,6 +96,28 @@ data:
     log-bin=mysql-bin
     binlog_format=ROW
     binlog_row_image=FULL
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-db-config
+data:
+  DB_URL: jdbc:mysql://orders-mysql:3306/orders
+  DB_NAME: orders
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: orders-db-secret
+type: Opaque
+stringData:
+  DB_USERNAME: user
+  DB_PASSWORD: pass
+  DB_ROOT_PASSWORD: root
 
 ---
 

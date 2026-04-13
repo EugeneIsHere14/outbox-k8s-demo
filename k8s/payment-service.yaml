@@ -36,6 +36,22 @@ spec:
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 5
+          env:
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: payments-db-config
+                  key: DB_URL
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: payments-db-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: payments-db-secret
+                  key: DB_PASSWORD
 
 ---
 
