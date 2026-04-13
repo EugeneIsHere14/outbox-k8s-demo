@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: payments-postgres
 spec:
+  # Using Recreate strategy to avoid issues with multiple Postgres instances trying to access the same data volume
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -20,11 +23,20 @@ spec:
 
           env:
             - name: POSTGRES_DB
-              value: payments
+              valueFrom:
+                configMapKeyRef:
+                  name: payments-db-config
+                  key: DB_NAME
             - name: POSTGRES_USER
-              value: user
+              valueFrom:
+                secretKeyRef:
+                  name: payments-db-secret
+                  key: DB_USERNAME
             - name: POSTGRES_PASSWORD
-              value: pass
+              valueFrom:
+                secretKeyRef:
+                  name: payments-db-secret
+                  key: DB_PASSWORD
 
           args:
             - "-c"
@@ -83,6 +95,27 @@ data:
     wal_level = logical
     max_wal_senders = 10
     max_replication_slots = 10
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payments-db-config
+data:
+  DB_URL: jdbc:postgresql://payments-postgres:5432/payments
+  DB_NAME: payments
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: payments-db-secret
+type: Opaque
+stringData:
+  DB_USERNAME: user
+  DB_PASSWORD: pass
 
 ---
 

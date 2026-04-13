@@ -10,6 +10,17 @@ spec:
       containers:
         - name: register-connector
           image: curlimages/curl:8.12.1
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: debezium-orders-db-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: debezium-orders-db-secret
+                  key: DB_PASSWORD
           command:
             - /bin/sh
             - -c
@@ -30,8 +41,18 @@ spec:
               ls -la /config
               test -f /config/connector.json
 
-              echo "=== connector.json content ==="
+              echo "=== Original connector.json ==="
               cat /config/connector.json
+              echo
+
+              echo "=== Rendering connector.json with env vars ==="
+              sed \
+                -e "s|\${DB_USERNAME}|${DB_USERNAME}|g" \
+                -e "s|\${DB_PASSWORD}|${DB_PASSWORD}|g" \
+                /config/connector.json > /tmp/connector.json
+
+              echo "=== Final connector.json ==="
+              cat /tmp/connector.json
               echo
 
               echo "=== Existing connectors before upsert ==="
@@ -44,7 +65,7 @@ spec:
                 -H "Accept: application/json" \
                 -H "Content-Type: application/json" \
                 "${CONNECT_URL}/connectors/${CONNECTOR_NAME}/config" \
-                --data-binary @/config/connector.json || true)
+                --data-binary @/tmp/connector.json || true)
 
               echo "PUT HTTP code: ${HTTP_CODE}"
               echo "PUT response body:"

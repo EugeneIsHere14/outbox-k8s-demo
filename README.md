@@ -59,12 +59,24 @@ k3d image import payment-service:1.0.0 -c demo-k8s-cluster
 
 ## Kubernetes Deployment
 
-### 4. Deploy infrastructure
+### 4. Deploy services in the specified order
+
+```bash
+kubectl apply -f orders-mysql.yaml
+kubectl apply -f payments-postgres.yaml
+kubectl apply -f order-service.yaml
+kubectl apply -f kafka.yaml
+kubectl apply -f payment-service.yaml
+```
+
+---
+
+### 5. Deploy infrastructure in the specified order
 
 ```bash
 kubectl apply -f precreate-topics.yaml
-kubectl apply -f kafka-connect.yaml
 kubectl apply -f debezium-connector-config.yaml
+kubectl apply -f kafka-connect.yaml
 kubectl apply -f register-connector-job.yaml
 ```
 
@@ -73,14 +85,6 @@ This step:
 - starts Kafka Connect
 - loads Debezium configuration
 - registers the connector
-
----
-
-### 5. Deploy services
-
-```bash
-kubectl apply -f .
-```
 
 ---
 
