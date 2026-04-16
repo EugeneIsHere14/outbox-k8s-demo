@@ -1,6 +1,7 @@
 package com.demo.order.controller;
 
 import com.demo.order.dto.OrderDto;
+import com.demo.order.dto.PaymentDto;
 import com.demo.order.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,13 @@ public class OrderController {
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
         return orderService.getOrderById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{orderId}/payment")
+    public ResponseEntity<PaymentDto> getPaymentByOrderId(@PathVariable Long orderId) {
+        return orderService.getPaymentByOrderId(orderId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

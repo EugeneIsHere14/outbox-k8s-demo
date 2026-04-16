@@ -4,6 +4,32 @@ Training project demonstrating Outbox Pattern with Debezium, Kafka, and Kubernet
 
 ---
 
+## Requirements
+
+- Java 21
+- Maven 3.9+
+- Docker
+- k3d (or any local Kubernetes cluster)
+- kubectl
+
+### Ports used locally
+
+Make sure the following ports are free:
+
+- 8080 — order-service
+- 8081 — payment-service
+- 9092 — Kafka
+- 3306 — MySQL (inside cluster)
+- 5432 — PostgreSQL (inside cluster)
+
+### Environment
+
+Tested on:
+- Linux (Ubuntu)
+- Docker / k3d
+
+---
+
 ## Architecture Overview
 
 ```

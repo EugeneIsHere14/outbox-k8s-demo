@@ -3,3 +3,7 @@ spring:
     url: jdbc:mysql://localhost:3315/orders
     username: user
     password: pass
+
+clients:
+  payment-service:
+    url: http://localhost:8081

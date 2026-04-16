@@ -6,3 +6,7 @@ spring:
 
 server:
   port: 8080
+
+app:
+  kafka:
+    enabled: true

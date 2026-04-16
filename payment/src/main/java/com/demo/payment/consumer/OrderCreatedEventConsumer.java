@@ -4,6 +4,7 @@ import com.demo.payment.dto.event.OrderEvent;
 import com.demo.payment.enums.OrderEventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
@@ -11,6 +12,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Component
+@ConditionalOnBooleanProperty(name = "app.kafka.enabled")
 @RequiredArgsConstructor
 public class OrderCreatedEventConsumer {
 
