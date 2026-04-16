@@ -1,9 +1,5 @@
--- Drop table if exists for safety
-DROP TABLE IF EXISTS outbox_events;
-DROP TABLE IF EXISTS payments;
-
 -- Create payments table
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id BIGSERIAL PRIMARY KEY,
     order_id BIGINT NOT NULL UNIQUE,
     amount DECIMAL(19,2) NOT NULL,
@@ -11,7 +7,7 @@ CREATE TABLE payments (
 );
 
 -- Create outbox_events table for outbox pattern
-CREATE TABLE outbox_events (
+CREATE TABLE IF NOT EXISTS outbox_events (
     id BIGSERIAL PRIMARY KEY,
     aggregate_type VARCHAR(100) NOT NULL,
     aggregate_id BIGINT NOT NULL,

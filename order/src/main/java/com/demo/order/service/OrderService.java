@@ -1,6 +1,8 @@
 package com.demo.order.service;
 
+import com.demo.order.client.PaymentServiceClient;
 import com.demo.order.dto.OrderDto;
+import com.demo.order.dto.PaymentDto;
 import com.demo.order.dto.event.OrderEvent;
 import com.demo.order.entity.Order;
 import com.demo.order.entity.OutboxEvent;
@@ -22,13 +24,16 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OutboxEventRepository outboxEventRepository;
+    private final PaymentServiceClient paymentServiceClient;
     private final ObjectMapper objectMapper;
 
     public OrderService(final OrderRepository orderRepository,
                         final OutboxEventRepository outboxEventRepository,
+                        final PaymentServiceClient paymentServiceClient,
                         final ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
         this.outboxEventRepository = outboxEventRepository;
+        this.paymentServiceClient = paymentServiceClient;
         this.objectMapper = objectMapper;
     }
 
@@ -48,6 +53,10 @@ public class OrderService {
     public Optional<OrderDto> getOrderById(Long id) {
         return orderRepository.findById(id)
                 .map(order -> new OrderDto(order.getId(), order.getCustomerName(), order.getAmount(), order.getStatus()));
+    }
+
+    public Optional<PaymentDto> getPaymentByOrderId(Long id) {
+        return paymentServiceClient.getPaymentByOrderId(id);
     }
 
     private void saveOutboxEvent(Order order, OrderEventType eventType) {
