@@ -88,8 +88,8 @@ k3d image import payment-service:1.0.0 -c demo-k8s-cluster
 ### 4. Deploy services in the specified order
 
 ```bash
-kubectl apply -f orders-mysql.yaml
-kubectl apply -f payments-postgres.yaml
+kubectl apply -f orders-db.yaml
+kubectl apply -f payments-db.yaml
 kubectl apply -f order-service.yaml
 kubectl apply -f kafka.yaml
 kubectl apply -f payment-service.yaml
@@ -99,6 +99,14 @@ kubectl apply -f payment-service.yaml
 
 ### 5. Deploy infrastructure in the specified order
 
+### 5.1 Delete existing jobs (if any)
+
+```bash
+kubectl delete job kafka-topics-init
+kubectl delete job register-order-outbox-connector
+```
+
+### 5.2 Deploy topics, connectors, and jobs
 ```bash
 kubectl apply -f precreate-topics.yaml
 kubectl apply -f debezium-connector-config.yaml
@@ -210,10 +218,6 @@ mysql -h 127.0.0.1 -P 3310 -u user -p
 ---
 
 ## Important Notes
-
-Kafka without persistent storage:
-- messages are lost after restart
-- acceptable for demo purposes
 
 Debezium snapshot mode:
 
