@@ -24,7 +24,8 @@ public class OrderCreatedEventConsumer {
         JsonNode payload = root.get("payload");
         OrderEvent event = objectMapper.treeToValue(payload, OrderEvent.class);
 
-        log.info("Received order event. Type: {}, orderId: {}", event.eventType(), event.orderId());
+        log.info("Received order event. Type: {}, orderId: {}, customerName: {}", event.eventType(), event.orderId(),
+                event.customerName());
 
         if (event.eventType() != OrderEventType.ORDER_CREATED) {
             log.info("Skipping unsupported event type: {}", event.eventType());
