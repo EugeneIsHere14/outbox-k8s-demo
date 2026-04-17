@@ -48,6 +48,8 @@ spec:
               mountPath: /var/lib/mysql
             - name: mysql-config
               mountPath: /etc/mysql/conf.d
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
 
           livenessProbe:
             tcpSocket:
@@ -68,6 +70,9 @@ spec:
         - name: mysql-config
           configMap:
             name: orders-mysql-config
+        - name: mysql-init
+          configMap:
+            name: orders-mysql-init
 
 ---
 
@@ -96,6 +101,18 @@ data:
     log-bin=mysql-bin
     binlog_format=ROW
     binlog_row_image=FULL
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-mysql-init
+data:
+  01-init-users-and-grants.sql: |
+    CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY 'pass';
+    GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'user'@'%';
+    FLUSH PRIVILEGES;
 
 ---
 
