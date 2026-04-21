@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: orders-mysql
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   # Using Recreate strategy to avoid issues with multiple MySQL instances trying to access the same data volume
   strategy:
@@ -80,6 +82,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: orders-mysql
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   type: ClusterIP
   selector:
@@ -94,6 +98,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: orders-mysql-config
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 data:
   my.cnf: |
     [mysqld]
@@ -108,11 +114,17 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: orders-mysql-init
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 data:
   01-init-users-and-grants.sql: |
-    CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY 'pass';
-    GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'user'@'%';
-    FLUSH PRIVILEGES;
+    CREATE
+    USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY 'pass';
+    GRANT
+    SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT
+    ON *.* TO 'user'@'%';
+    FLUSH
+    PRIVILEGES;
 
 ---
 
@@ -120,6 +132,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: orders-db-config
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 data:
   DB_URL: jdbc:mysql://orders-mysql:3306/orders
   DB_NAME: orders
@@ -130,6 +144,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: orders-db-secret
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 type: Opaque
 stringData:
   DB_USERNAME: user
@@ -142,6 +158,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: orders-mysql-pvc
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   accessModes:
     - ReadWriteOnce

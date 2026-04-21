@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kafka-connect
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   selector:
     app: kafka-connect
@@ -17,6 +19,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka-connect
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   replicas: 1
   selector:

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: outbox-k8s-demo
+spec:
+  destination:
+    namespace: demo-k8s
+    server: https://kubernetes.default.svc
+  source:
+    path: k8s
+    repoURL: https://github.com/EugeneIsHere14/outbox-k8s-demo.git
+    targetRevision: main
+  sources: []
+  project: default
+  syncPolicy:
+    syncOptions:
+      - PrunePropagationPolicy=foreground
+      - ApplyOutOfSyncOnly=true
