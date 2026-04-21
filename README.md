@@ -59,7 +59,7 @@ Order service does not communicate with Kafka directly. It only writes to the da
 
 ---
 
-## Local Setup (k3d + Kubernetes)
+## Local Setup (k3d + Kubernetes Manual Deployment)
 
 ### 1. Build services
 
@@ -202,6 +202,45 @@ Check logs:
 ```bash
 kubectl logs deployment/payment-service -f
 ```
+
+---
+
+## Local Setup (k3d + Kubernetes Manual Deployment)
+
+### 1. Install Argo CD
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+---
+
+### 2. Remove existing application (if any) via Argo CD UI or CLI
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+---
+
+### 3. Get Argo CD initial admin password
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+---
+
+### 4. Run Argo CD application manifest from argocd directory
+
+```bash
+kubectl apply -f application.yaml -n argocd
+```
+
+---
+
+### 5. Test the flow as described in the section for manual setup.
 
 ---
 
