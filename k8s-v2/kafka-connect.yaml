@@ -7,7 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "4"
     strimzi.io/use-connector-resources: "true"
 spec:
-  version: 4.0.2
+  version: 4.2.0
   image: quay.io/debezium/connect:3.4
   replicas: 1
   bootstrapServers: kafka-kafka-bootstrap:9092
