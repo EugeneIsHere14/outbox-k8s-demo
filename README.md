@@ -207,16 +207,19 @@ kubectl logs deployment/payment-service -f
 
 ## Local Setup (k3d + Kubernetes Manual Deployment)
 
-### 1. Install Argo CD
+### 1. Install Argo CD and Strimzi Kafka Operator
 
 ```bash
 kubectl create namespace argocd
 kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+kubectl create namespace kafka
+kubectl apply -f https://strimzi.io/install/latest?namespace=kafka -n kafka   
 ```
 
 ---
 
-### 2. Remove existing application (if any) via Argo CD UI or CLI
+### 2. Remove existing application (if any) via Argo CD UI or CLI and port-forward Argo CD server
 
 ```bash
 kubectl port-forward svc/argocd-server -n argocd 8080:443
