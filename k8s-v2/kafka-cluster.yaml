@@ -23,6 +23,24 @@ spec:
 ---
 
 apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: order-events
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  partitions: 1
+  replicas: 1
+  config:
+    min.insync.replicas: 1
+    cleanup.policy: delete
+
+---
+
+apiVersion: kafka.strimzi.io/v1
 kind: Kafka
 metadata:
   name: kafka
@@ -32,14 +50,15 @@ metadata:
 spec:
   kafka:
     version: 4.2.0
+    metadataVersion: 4.2
     listeners:
       - name: plain
         port: 9092
         type: internal
         tls: false
     config:
-      # Auto-create topics when a producer or consumer tries to access a non-existing topic
-      auto.create.topics.enable: true
+      # Disable auto topic creation to ensure topics are created with the correct configuration via Topic Operators
+      auto.create.topics.enable: false
 
       # Single-node settings
       offsets.topic.replication.factor: 1

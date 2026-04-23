@@ -219,7 +219,17 @@ kubectl apply -f https://strimzi.io/install/latest?namespace=kafka -n kafka
 
 ---
 
-### 2. Remove existing application (if any) via Argo CD UI or CLI and port-forward Argo CD server
+### 2. Build and push debezium mysql connector image for Kafka Connect to local registry
+
+```bash
+docker build -t kafka-connect-debezium:1.0.0 .
+
+k3d image import kafka-connect-debezium:1.0.0 -c demo-k8s-cluster
+```
+
+---
+
+### 3. Remove existing application (if any) via Argo CD UI or CLI and port-forward Argo CD server
 
 ```bash
 kubectl port-forward svc/argocd-server -n argocd 8080:443
@@ -227,7 +237,7 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 ---
 
-### 3. Get Argo CD initial admin password
+### 4. Get Argo CD initial admin password
 
 ```bash
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
@@ -235,7 +245,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 ---
 
-### 4. Run Argo CD application manifest from argocd directory
+### 5. Run Argo CD application manifest from argocd directory
 
 ```bash
 kubectl apply -f application.yaml -n argocd
@@ -243,7 +253,7 @@ kubectl apply -f application.yaml -n argocd
 
 ---
 
-### 5. Test the flow as described in the section for manual setup.
+### 6. Test the flow as described in the section for manual setup.
 
 ---
 
