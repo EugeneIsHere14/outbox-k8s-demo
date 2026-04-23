@@ -20,18 +20,31 @@ public class OrderCreatedEventConsumer {
 
     @KafkaListener(topics = "order-events", groupId = "payment-group")
     public void consume(final String message) {
-        JsonNode root = objectMapper.readTree(message);
-        JsonNode payload = root.get("payload");
-        OrderEvent event = objectMapper.treeToValue(payload, OrderEvent.class);
+        try {
+            JsonNode root = objectMapper.readTree(message);
 
-        log.info("Received order event. Type: {}, orderId: {}, customerName: {}", event.eventType(), event.orderId(),
-                event.customerName());
+            JsonNode eventNode = root.hasNonNull("payload") && root.get("payload").isObject()
+                    ? root.get("payload")
+                    : root;
 
-        if (event.eventType() != OrderEventType.ORDER_CREATED) {
-            log.info("Skipping unsupported event type: {}", event.eventType());
-            return;
+            OrderEvent event = objectMapper.treeToValue(eventNode, OrderEvent.class);
+
+            if (event == null) {
+                log.warn("Received null order event. Raw message={}", message);
+                return;
+            }
+
+            log.info("Received order event. Type: {}, orderId: {}, customerName: {}",
+                    event.eventType(), event.orderId(), event.customerName());
+
+            if (event.eventType() != OrderEventType.ORDER_CREATED) {
+                log.info("Skipping unsupported event type: {}", event.eventType());
+                return;
+            }
+
+            log.info("Starting payment flow for orderId={}", event.orderId());
+        } catch (Exception ex) {
+            log.error("Failed to parse Kafka message. Raw message={}", message, ex);
         }
-
-        log.info("Starting payment flow for orderId={}", event.orderId());
     }
 }
