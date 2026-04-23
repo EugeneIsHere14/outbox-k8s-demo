@@ -31,8 +31,3 @@ spec:
 
     rest.advertised.host.name: kafka-connect
     connector.client.config.override.policy: None
-
-  logging:
-    type: inline
-    loggers:
-      connect.root.logger.level: "INFO"

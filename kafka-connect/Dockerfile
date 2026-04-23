@@ -9,7 +9,7 @@ RUN microdnf install -y unzip && microdnf clean all
 COPY ./plugins/debezium-connector-mysql-3.5.0.Final-plugin.zip /tmp/
 
 # Unzip plugin to correct directory, set permissions and clean up
-RUN unzip /tmp/debezium-connector-mysql-3.5.0.Final-plugin.zip -d /opt/kafka/plugins/ && \
+RUN unzip /tmp/debezium-connector-mysql-3.5.0.Final-plugin.zip -d /opt/kafka/plugins/debezium-connector-mysql && \
     rm /tmp/debezium-connector-mysql-3.5.0.Final-plugin.zip && \
     chown -R 1001:0 /opt/kafka/plugins
 
