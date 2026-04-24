@@ -205,7 +205,7 @@ kubectl logs deployment/payment-service -f
 
 ---
 
-## Local Setup (k3d + Kubernetes Manual Deployment)
+## Local Setup (k3d + Argo CD and Strimzi)
 
 ### 1. Install Argo CD and Strimzi Kafka Operator
 
