@@ -6,7 +6,7 @@ metadata:
   labels:
     strimzi.io/cluster: kafka
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   replicas: 1
   roles:
@@ -23,30 +23,12 @@ spec:
 ---
 
 apiVersion: kafka.strimzi.io/v1
-kind: KafkaTopic
-metadata:
-  name: order-events
-  namespace: kafka
-  labels:
-    strimzi.io/cluster: kafka
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-spec:
-  partitions: 1
-  replicas: 1
-  config:
-    min.insync.replicas: 1
-    cleanup.policy: delete
-
----
-
-apiVersion: kafka.strimzi.io/v1
 kind: Kafka
 metadata:
   name: kafka
   namespace: kafka
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   kafka:
     version: 4.2.0

@@ -4,7 +4,7 @@ metadata:
   name: kafka-connect
   namespace: kafka
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "3"
 
     # Enables KafkaConnector resources
     strimzi.io/use-connector-resources: "true"

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: order-service
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "5"
   labels:
     app: order-service
     type: backend
@@ -67,7 +67,7 @@ kind: Service
 metadata:
   name: order-service
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   type: ClusterIP
   selector:
@@ -84,7 +84,7 @@ kind: ConfigMap
 metadata:
   name: order-service-config
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "5"
 data:
   PAYMENT_SERVICE_URL: http://payment-service:8080
 
