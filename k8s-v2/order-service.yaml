@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: order-service
-          image: order-service:1.0.0
+          image: order-service:1.0.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
