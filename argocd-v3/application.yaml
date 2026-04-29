@@ -9,7 +9,7 @@ spec:
   source:
     path: k8s-v3
     repoURL: https://github.com/EugeneIsHere14/outbox-k8s-demo.git
-    targetRevision: feature/helm-migration
+    targetRevision: main
     helm:
       releaseName: outbox-k8s-demo
       valueFiles:
