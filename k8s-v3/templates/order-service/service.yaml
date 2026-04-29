@@ -1,0 +1,17 @@
+{{- if .Values.orderService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.orderService.syncWave }}"
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - name: http
+      port: {{ .Values.orderService.port }}
+      targetPort: {{ .Values.orderService.port }}
+{{- end }}

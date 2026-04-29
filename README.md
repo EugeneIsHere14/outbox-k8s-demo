@@ -269,6 +269,12 @@ mysql -h 127.0.0.1 -P 3310 -u user -p
 
 ---
 
+## Local Setup (k3d + Argo CD and Strimzi via Helm Charts)
+
+Steps are the same to the previous section, but you will apply application manifest for Argo CD in k8s-v3 folder.
+
+---
+
 ## Important Notes
 
 Debezium snapshot mode:

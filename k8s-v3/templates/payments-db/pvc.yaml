@@ -1,0 +1,15 @@
+{{- if .Values.paymentsPostgres.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: payments-postgres-pvc
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.paymentsPostgres.syncWave }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.paymentsPostgres.storage }}
+{{- end }}

@@ -1,0 +1,15 @@
+{{- if .Values.ordersMysql.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: orders-mysql-pvc
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.ordersMysql.syncWave }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.ordersMysql.storage }}
+{{- end }}

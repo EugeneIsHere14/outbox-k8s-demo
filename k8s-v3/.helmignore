@@ -1,0 +1,8 @@
+# Helm
+
+# Ignore files by default with extensions
+*.swp
+*.swo
+*~
+.DS_Store
+*.orig

@@ -1,0 +1,68 @@
+{{- if .Values.paymentsPostgres.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-postgres
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.paymentsPostgres.syncWave }}"
+spec:
+  strategy:
+    type: Recreate
+  replicas: {{ .Values.paymentsPostgres.replicas }}
+  selector:
+    matchLabels:
+      app: payments-postgres
+  template:
+    metadata:
+      labels:
+        app: payments-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.paymentsPostgres.image }}"
+          ports:
+            - containerPort: {{ .Values.paymentsPostgres.port }}
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: payments-db-config
+                  key: DB_NAME
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: payments-db-secret
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: payments-db-secret
+                  key: DB_PASSWORD
+          args:
+            - "-c"
+            - "config_file=/etc/postgresql/postgresql.conf"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-config
+              mountPath: /etc/postgresql/postgresql.conf
+              subPath: postgresql.conf
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.paymentsPostgres.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.paymentsPostgres.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: payments-postgres-pvc
+        - name: postgres-config
+          configMap:
+            name: payments-postgres-config
+{{- end }}

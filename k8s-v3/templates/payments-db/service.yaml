@@ -1,0 +1,16 @@
+{{- if .Values.paymentsPostgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-postgres
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.paymentsPostgres.syncWave }}"
+spec:
+  type: ClusterIP
+  selector:
+    app: payments-postgres
+  ports:
+    - port: {{ .Values.paymentsPostgres.port }}
+      targetPort: {{ .Values.paymentsPostgres.port }}
+{{- end }}

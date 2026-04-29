@@ -1,0 +1,80 @@
+global:
+  namespace: demo-k8s
+
+# MySQL (Orders Database)
+ordersMysql:
+  enabled: true
+  syncWave: "0"
+  image: mysql:8.0
+  replicas: 1
+  port: 3306
+  storage: 200Mi
+  database: orders
+  username: user
+  password: pass
+  rootPassword: root
+  config:
+    serverId: "1"
+
+# PostgreSQL (Payments Database)
+paymentsPostgres:
+  enabled: true
+  syncWave: "0"
+  image: postgres:16
+  replicas: 1
+  port: 5432
+  storage: 200Mi
+  database: payments
+  username: user
+  password: pass
+
+# Strimzi Kafka
+kafka:
+  enabled: true
+  syncWave: "1"
+  kafkaVersion: "4.2.0"
+  brokerReplicas: 1
+  storage: 200Mi
+  autoCreateTopicsEnable: false
+
+kafkaConnector:
+  enabled: true
+  syncWave: "3"
+  image: kafka-connect-debezium:1.0.0
+  replicas: 1
+  groupId: connect-cluster
+
+kafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: order-events
+  partitions: 1
+  replicas: 1
+
+debeziumConnector:
+  enabled: true
+  syncWave: "4"
+  ordersDatabaseHost: "orders-mysql.demo-k8s"
+  ordersDatabasePort: "3306"
+  ordersDatabaseUser: "user"
+  ordersDatabasePassword: "pass"
+  serverId: "184054"
+  topicPrefix: "ordersdb"
+  topicReplacement: "order-events"
+
+# Order Service
+orderService:
+  enabled: true
+  syncWave: "5"
+  image: order-service:1.0.0
+  replicas: 1
+  port: 8080
+  paymentServiceUrl: http://payment-service:8080
+
+# Payment Service
+paymentService:
+  enabled: true
+  syncWave: "5"
+  image: payment-service:1.0.0
+  replicas: 1
+  port: 8080

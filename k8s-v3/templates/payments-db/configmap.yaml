@@ -1,0 +1,28 @@
+{{- if .Values.paymentsPostgres.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payments-postgres-config
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.paymentsPostgres.syncWave }}"
+data:
+  postgresql.conf: |
+    listen_addresses = '*'
+    wal_level = logical
+    max_wal_senders = 10
+    max_replication_slots = 10
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payments-db-config
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.paymentsPostgres.syncWave }}"
+data:
+  DB_URL: "jdbc:postgresql://payments-postgres:{{ .Values.paymentsPostgres.port }}/{{ .Values.paymentsPostgres.database }}"
+  DB_NAME: "{{ .Values.paymentsPostgres.database }}"
+{{- end }}
