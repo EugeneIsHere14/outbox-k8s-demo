@@ -1,0 +1,64 @@
+{{- if .Values.orderService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.orderService.syncWave }}"
+  labels:
+    app: order-service
+    type: backend
+    env: k8s
+spec:
+  replicas: {{ .Values.orderService.replicas }}
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+        type: backend
+        env: k8s
+    spec:
+      containers:
+        - name: order-service
+          image: "{{ .Values.orderService.image }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.orderService.port }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.orderService.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.orderService.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          env:
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: orders-db-config
+                  key: DB_URL
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_PASSWORD
+            - name: PAYMENT_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: order-service-config
+                  key: PAYMENT_SERVICE_URL
+{{- end }}

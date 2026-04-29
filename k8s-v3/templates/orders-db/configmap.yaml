@@ -1,0 +1,44 @@
+{{- if .Values.ordersMysql.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-mysql-config
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.ordersMysql.syncWave }}"
+data:
+  my.cnf: |
+    [mysqld]
+    server-id={{ .Values.ordersMysql.config.serverId }}
+    log-bin=mysql-bin
+    binlog_format=ROW
+    binlog_row_image=FULL
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-mysql-init
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.ordersMysql.syncWave }}"
+data:
+  01-init-users-and-grants.sql: |
+    CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY 'pass';
+    GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'user'@'%';
+    FLUSH PRIVILEGES;
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-db-config
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.ordersMysql.syncWave }}"
+data:
+  DB_URL: "jdbc:mysql://orders-mysql:{{ .Values.ordersMysql.port }}/{{ .Values.ordersMysql.database }}"
+  DB_NAME: "{{ .Values.ordersMysql.database }}"
+{{- end }}

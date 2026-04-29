@@ -1,0 +1,74 @@
+{{- if .Values.ordersMysql.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-mysql
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.ordersMysql.syncWave }}"
+spec:
+  strategy:
+    type: Recreate
+  replicas: {{ .Values.ordersMysql.replicas }}
+  selector:
+    matchLabels:
+      app: orders-mysql
+  template:
+    metadata:
+      labels:
+        app: orders-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: "{{ .Values.ordersMysql.image }}"
+          ports:
+            - containerPort: {{ .Values.ordersMysql.port }}
+          env:
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: orders-db-config
+                  key: DB_NAME
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_USERNAME
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: orders-db-secret
+                  key: DB_ROOT_PASSWORD
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-config
+              mountPath: /etc/mysql/conf.d
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.ordersMysql.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.ordersMysql.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: orders-mysql-pvc
+        - name: mysql-config
+          configMap:
+            name: orders-mysql-config
+        - name: mysql-init
+          configMap:
+            name: orders-mysql-init
+{{- end }}

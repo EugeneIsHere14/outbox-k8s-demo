@@ -1,0 +1,28 @@
+{{- if .Values.kafkaConnector.enabled }}
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaConnect
+metadata:
+  name: kafka-connect
+  namespace: kafka
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.kafkaConnector.syncWave }}"
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: {{ .Values.kafka.kafkaVersion }}
+  image: {{ .Values.kafkaConnector.image }}
+  replicas: {{ .Values.kafkaConnector.replicas }}
+  bootstrapServers: kafka-kafka-bootstrap:9092
+  groupId: {{ .Values.kafkaConnector.groupId }}
+  configStorageTopic: connect-configs
+  offsetStorageTopic: connect-offsets
+  statusStorageTopic: connect-status
+  config:
+    config.storage.replication.factor: 1
+    offset.storage.replication.factor: 1
+    status.storage.replication.factor: 1
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+    rest.advertised.host.name: kafka-connect
+    connector.client.config.override.policy: None
+{{- end }}
