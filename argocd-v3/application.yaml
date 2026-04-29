@@ -12,6 +12,7 @@ spec:
     targetRevision: feature/helm-migration
     helm:
       releaseName: outbox-k8s-demo
+      valueFiles:
         - values.yaml
   project: default
   syncPolicy:
