@@ -54,7 +54,7 @@ orderEventsKafkaTopic:
 snapshotCustomersKafkaTopic:
   enabled: true
   syncWave: "2"
-  name: orders-snapshot-cdc.customers_snapshot_test
+  name: orders-snapshot-cdc.orders.customers_snapshot_test
   partitions: 1
   replicas: 1
 
