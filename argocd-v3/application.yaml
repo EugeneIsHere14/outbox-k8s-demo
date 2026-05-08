@@ -9,7 +9,7 @@ spec:
   source:
     path: k8s-v3
     repoURL: https://github.com/EugeneIsHere14/outbox-k8s-demo.git
-    targetRevision: main
+    targetRevision: feature/debezium-snapshots-and-signals
     helm:
       releaseName: outbox-k8s-demo
       valueFiles:

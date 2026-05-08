@@ -51,6 +51,13 @@ kafkaTopic:
   partitions: 1
   replicas: 1
 
+customersSnapshotkafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: customersdb.orders.customers_snapshot_test
+  partitions: 1
+  replicas: 1
+
 debeziumConnector:
   enabled: true
   syncWave: "4"
@@ -61,6 +68,14 @@ debeziumConnector:
   serverId: "184054"
   topicPrefix: "ordersdb"
   topicReplacement: "order-events"
+
+customersSnapshotConnector:
+  enabled: true
+  syncWave: "4"
+  serverId: "184055"
+  topicPrefix: "customersdb"
+  snapshotMode: "no_data"
+  incrementalSnapshotChunkSize: "2"
 
 # Order Service
 orderService:
