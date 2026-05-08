@@ -77,7 +77,7 @@ orderOutboxConnector:
   topicReplacement: "order-events"
 
 snapshotPracticeConnector:
-  enabled: false
+  enabled: true
   syncWave: "4"
   ordersDatabaseHost: "orders-mysql.demo-k8s"
   ordersDatabasePort: "3306"
