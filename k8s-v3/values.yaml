@@ -70,7 +70,7 @@ debeziumConnector:
   topicReplacement: "order-events"
 
 customersSnapshotConnector:
-  enabled: true
+  enabled: false
   syncWave: "4"
   serverId: "184055"
   topicPrefix: "customersdb"
