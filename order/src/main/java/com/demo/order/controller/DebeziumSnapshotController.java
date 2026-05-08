@@ -17,7 +17,7 @@ public class DebeziumSnapshotController {
 
     private final DebeziumSignalService debeziumSignalService;
 
-    @PostMapping("/customers")
+    @PostMapping
     public ResponseEntity<Void> triggerSnapshot(@Valid @RequestBody DebeziumSnapshotRequest request) {
         debeziumSignalService.triggerSnapshot(request);
 

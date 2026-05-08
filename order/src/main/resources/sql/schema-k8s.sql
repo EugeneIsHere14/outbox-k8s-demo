@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS customers_snapshot_test (
 
 -- Create debezium_signals table
 CREATE TABLE IF NOT EXISTS debezium_signals (
-    id VARCHAR(64) PRIMARY KEY,
+    id VARCHAR(128) PRIMARY KEY,
     type VARCHAR(32) NOT NULL,
     data VARCHAR(2048)
 );
