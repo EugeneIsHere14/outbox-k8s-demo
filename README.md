@@ -433,7 +433,7 @@ Example request with filters:
 ```json
 {
   "tableName": "customers_snapshot_test",
-  "fromId": 2,
+  "fromIdInclusive": 2,
   "createdFrom": "2026-05-01T00:00:00",
   "createdTo": "2026-05-08T23:59:59"
 }
@@ -557,7 +557,7 @@ curl -X POST http://localhost:8080/internal/debezium/snapshots \
   -H "Content-Type: application/json" \
   -d '{
     "tableName": "customers_snapshot_test",
-    "fromId": 2
+    "fromIdInclusive": 2
   }'
 ```
 
@@ -585,13 +585,13 @@ curl -X POST http://localhost:8080/internal/debezium/snapshots \
   -H "Content-Type: application/json" \
   -d '{
     "tableName": "customers_snapshot_test",
-    "fromId": 2,
+    "fromIdInclusive": 2,
     "createdFrom": "2026-05-01T00:00:00",
     "createdTo": "2026-05-08T23:59:59"
   }'
 ```
 
-Default values for signalType and snapshotType fields are set by default but can be overridden:
+Default values for signalType and snapshotType fields are set by default to 'execute-snapshot' and 'incremental' respectively, but can be overridden:
 
 ```bash
 curl -X POST http://localhost:8080/internal/debezium/snapshots \
@@ -600,7 +600,7 @@ curl -X POST http://localhost:8080/internal/debezium/snapshots \
     "tableName": "customers_snapshot_test",
     "signalType": "execute-snapshot",
     "snapshotType": "blocking",
-    "fromId": 2,
+    "fromIdInclusive": 2,
     "createdFrom": "2026-05-01T00:00:00",
     "createdTo": "2026-05-08T23:59:59"
   }'
