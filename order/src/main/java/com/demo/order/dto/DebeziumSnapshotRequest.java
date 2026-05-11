@@ -15,7 +15,13 @@ public class DebeziumSnapshotRequest {
     @NotBlank
     private String tableName;
 
-    private Long fromId;
+    @Builder.Default
+    private String signalType = "execute-snapshot";
+
+    @Builder.Default
+    private String snapshotType = "incremental";
+
+    private Long fromIdInclusive;
 
     private LocalDateTime createdFrom;
 

@@ -85,7 +85,7 @@ snapshotPracticeConnector:
   ordersDatabasePassword: "pass"
   serverId: "184055"
   topicPrefix: "orders-snapshot-cdc"
-  snapshotMode: "no_data"
+  snapshotMode: "when_needed"
   incrementalSnapshotChunkSize: "2"
 
 # Order Service

@@ -14,18 +14,22 @@ import java.util.*;
 public class DebeziumSignalService {
 
     private static final String DATABASE_NAME = "orders";
-    private static final String SIGNAL_TYPE_EXECUTE_SNAPSHOT = "execute-snapshot";
-    private static final String SNAPSHOT_TYPE_INCREMENTAL = "incremental";
+
+    private static final Set<String> ALLOWED_SIGNAL_TYPES = Set.of("execute-snapshot");
+
+    private static final Set<String> ALLOWED_SNAPSHOT_TYPES = Set.of("incremental", "blocking");
 
     private final DebeziumSignalRepository debeziumSignalRepository;
     private final ObjectMapper objectMapper;
 
     public void triggerSnapshot(DebeziumSnapshotRequest request) {
+        validateRequest(request);
+
         String dataCollection = DATABASE_NAME + "." + request.getTableName();
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("data-collections", List.of(dataCollection));
-        data.put("type", SNAPSHOT_TYPE_INCREMENTAL);
+        data.put("type", request.getSnapshotType());
 
         String filter = buildFilter(request);
 
@@ -38,18 +42,28 @@ public class DebeziumSignalService {
 
         DebeziumSignalEntity signal = DebeziumSignalEntity.builder()
                 .id("snapshot-" + request.getTableName() + "-" + UUID.randomUUID())
-                .type(SIGNAL_TYPE_EXECUTE_SNAPSHOT)
+                .type(request.getSignalType())
                 .data(toString(data))
                 .build();
 
         debeziumSignalRepository.save(signal);
     }
 
+    private void validateRequest(DebeziumSnapshotRequest request) {
+        if (!ALLOWED_SIGNAL_TYPES.contains(request.getSignalType())) {
+            throw new IllegalArgumentException("Unsupported Debezium signal type: " + request.getSignalType());
+        }
+
+        if (!ALLOWED_SNAPSHOT_TYPES.contains(request.getSnapshotType())) {
+            throw new IllegalArgumentException("Unsupported Debezium snapshot type: " + request.getSnapshotType());
+        }
+    }
+
     private String buildFilter(DebeziumSnapshotRequest request) {
         List<String> conditions = new ArrayList<>();
 
-        if (request.getFromId() != null) {
-            conditions.add("id > " + request.getFromId());
+        if (request.getFromIdInclusive() != null) {
+            conditions.add("id >= " + request.getFromIdInclusive());
         }
 
         if (request.getCreatedFrom() != null) {
