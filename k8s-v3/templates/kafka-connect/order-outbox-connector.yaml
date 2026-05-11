@@ -1,4 +1,4 @@
-{{- if .Values.debeziumConnector.enabled }}
+{{- if .Values.orderOutboxConnector.enabled }}
 apiVersion: kafka.strimzi.io/v1
 kind: KafkaConnector
 metadata:
@@ -7,17 +7,17 @@ metadata:
   labels:
     strimzi.io/cluster: kafka-connect
   annotations:
-    argocd.argoproj.io/sync-wave: "{{ .Values.debeziumConnector.syncWave }}"
+    argocd.argoproj.io/sync-wave: "{{ .Values.orderOutboxConnector.syncWave }}"
 spec:
   class: io.debezium.connector.mysql.MySqlConnector
   tasksMax: 1
   config:
-    database.hostname: "{{ .Values.debeziumConnector.ordersDatabaseHost }}"
-    database.port: "{{ .Values.debeziumConnector.ordersDatabasePort }}"
-    database.user: "{{ .Values.debeziumConnector.ordersDatabaseUser }}"
-    database.password: "{{ .Values.debeziumConnector.ordersDatabasePassword }}"
-    database.server.id: "{{ .Values.debeziumConnector.serverId }}"
-    topic.prefix: "{{ .Values.debeziumConnector.topicPrefix }}"
+    database.hostname: "{{ .Values.orderOutboxConnector.ordersDatabaseHost }}"
+    database.port: "{{ .Values.orderOutboxConnector.ordersDatabasePort }}"
+    database.user: "{{ .Values.orderOutboxConnector.ordersDatabaseUser }}"
+    database.password: "{{ .Values.orderOutboxConnector.ordersDatabasePassword }}"
+    database.server.id: "{{ .Values.orderOutboxConnector.serverId }}"
+    topic.prefix: "{{ .Values.orderOutboxConnector.topicPrefix }}"
     database.include.list: "orders"
     table.include.list: "orders.outbox_events"
     schema.history.internal.kafka.bootstrap.servers: "kafka-kafka-bootstrap:9092"
@@ -27,7 +27,7 @@ spec:
     tombstones.on.delete: "false"
     transforms: "outbox"
     transforms.outbox.type: "io.debezium.transforms.outbox.EventRouter"
-    transforms.outbox.route.topic.replacement: "{{ .Values.debeziumConnector.topicReplacement }}"
+    transforms.outbox.route.topic.replacement: "{{ .Values.orderOutboxConnector.topicReplacement }}"
     transforms.outbox.table.field.event.id: "id"
     transforms.outbox.table.field.event.key: "aggregate_id"
     transforms.outbox.table.field.event.payload: "payload"
@@ -35,6 +35,6 @@ spec:
     transforms.outbox.table.expand.json.payload: "true"
     predicates: "isOutboxTable"
     predicates.isOutboxTable.type: "org.apache.kafka.connect.transforms.predicates.TopicNameMatches"
-    predicates.isOutboxTable.pattern: "ordersdb\\.orders\\.outbox_events"
+    predicates.isOutboxTable.pattern: "orders-outbox-cdc\\.orders\\.outbox_events"
     transforms.outbox.predicate: "isOutboxTable"
 {{- end }}

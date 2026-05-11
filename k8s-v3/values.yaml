@@ -44,14 +44,28 @@ kafkaConnector:
   replicas: 1
   groupId: connect-cluster
 
-kafkaTopic:
+orderEventsKafkaTopic:
   enabled: true
   syncWave: "2"
   name: order-events
   partitions: 1
   replicas: 1
 
-debeziumConnector:
+snapshotCustomersKafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: orders-snapshot-cdc.orders.customers_snapshot_test
+  partitions: 1
+  replicas: 1
+
+snapshotSignalsKafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: orders-snapshot-cdc.orders.debezium_signals
+  partitions: 1
+  replicas: 1
+
+orderOutboxConnector:
   enabled: true
   syncWave: "4"
   ordersDatabaseHost: "orders-mysql.demo-k8s"
@@ -59,8 +73,20 @@ debeziumConnector:
   ordersDatabaseUser: "user"
   ordersDatabasePassword: "pass"
   serverId: "184054"
-  topicPrefix: "ordersdb"
+  topicPrefix: "orders-outbox-cdc"
   topicReplacement: "order-events"
+
+snapshotPracticeConnector:
+  enabled: true
+  syncWave: "4"
+  ordersDatabaseHost: "orders-mysql.demo-k8s"
+  ordersDatabasePort: "3306"
+  ordersDatabaseUser: "user"
+  ordersDatabasePassword: "pass"
+  serverId: "184055"
+  topicPrefix: "orders-snapshot-cdc"
+  snapshotMode: "when_needed"
+  incrementalSnapshotChunkSize: "2"
 
 # Order Service
 orderService:
