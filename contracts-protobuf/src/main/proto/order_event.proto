@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package order.events;
+
+import "order_status.proto";
+
+option java_package = "com.demo.protobuf.order.event";
+option java_multiple_files = true;
+
+
+message OrderEvent {
+  string event_type = 1;
+  int64 order_id = 2;
+  string customer_name = 3;
+  string amount = 4;
+  OrderStatus status = 5;
+}

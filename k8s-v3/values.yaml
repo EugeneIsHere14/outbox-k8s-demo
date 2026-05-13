@@ -51,6 +51,13 @@ orderEventsKafkaTopic:
   partitions: 1
   replicas: 1
 
+protobufOrderEventsKafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: order-events-protobuf
+  partitions: 1
+  replicas: 1
+
 snapshotCustomersKafkaTopic:
   enabled: true
   syncWave: "2"
@@ -75,6 +82,19 @@ orderOutboxConnector:
   serverId: "184054"
   topicPrefix: "orders-outbox-cdc"
   topicReplacement: "order-events"
+
+orderProtobufOutboxConnector:
+  enabled: true
+  syncWave: "4"
+  ordersDatabaseHost: "orders-mysql.demo-k8s"
+  ordersDatabasePort: "3306"
+  ordersDatabaseUser: "user"
+  ordersDatabasePassword: "pass"
+  serverId: "184055"
+  topicPrefix: "orders-protobuf-outbox-cdc"
+  topicReplacement: "order-events-protobuf"
+  keyConverter: org.apache.kafka.connect.storage.StringConverter
+  valueConverter: org.apache.kafka.connect.converters.ByteArrayConverter
 
 snapshotPracticeConnector:
   enabled: true

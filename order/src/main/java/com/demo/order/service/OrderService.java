@@ -6,11 +6,13 @@ import com.demo.order.dto.PaymentDto;
 import com.demo.order.dto.event.OrderEvent;
 import com.demo.order.entity.Order;
 import com.demo.order.entity.OutboxEvent;
+import com.demo.order.entity.ProtobufOutboxEvent;
 import com.demo.order.enums.AggregateType;
 import com.demo.order.enums.OrderEventType;
 import com.demo.order.enums.OrderStatus;
 import com.demo.order.repository.OrderRepository;
 import com.demo.order.repository.OutboxEventRepository;
+import com.demo.order.repository.ProtobufOutboxEventRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -24,15 +26,18 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OutboxEventRepository outboxEventRepository;
+    private final ProtobufOutboxEventRepository protobufOutboxEventRepository;
     private final PaymentServiceClient paymentServiceClient;
     private final ObjectMapper objectMapper;
 
     public OrderService(final OrderRepository orderRepository,
                         final OutboxEventRepository outboxEventRepository,
+                        final ProtobufOutboxEventRepository protobufOutboxEventRepository,
                         final PaymentServiceClient paymentServiceClient,
                         final ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
         this.outboxEventRepository = outboxEventRepository;
+        this.protobufOutboxEventRepository = protobufOutboxEventRepository;
         this.paymentServiceClient = paymentServiceClient;
         this.objectMapper = objectMapper;
     }
@@ -46,6 +51,19 @@ public class OrderService {
         Order saved = orderRepository.save(order);
 
         saveOutboxEvent(saved, OrderEventType.ORDER_CREATED);
+
+        return new OrderDto(saved.getId(), saved.getCustomerName(), saved.getAmount(), saved.getStatus());
+    }
+
+    @Transactional
+    public OrderDto createOrderWithProtobuf(OrderDto orderDto) {
+        Order order = new Order();
+        order.setCustomerName(orderDto.customerName());
+        order.setAmount(orderDto.amount());
+        order.setStatus(OrderStatus.CREATED);
+        Order saved = orderRepository.save(order);
+
+        saveProtobufOutboxEvent(saved, OrderEventType.ORDER_CREATED);
 
         return new OrderDto(saved.getId(), saved.getCustomerName(), saved.getAmount(), saved.getStatus());
     }
@@ -77,5 +95,25 @@ public class OrderService {
         event.setCreatedAt(LocalDateTime.now());
 
         outboxEventRepository.save(event);
+    }
+
+    private void saveProtobufOutboxEvent(Order order, OrderEventType eventType) {
+        com.demo.protobuf.order.event.OrderEvent protobufEvent = com.demo.protobuf.order.event.OrderEvent.newBuilder()
+                .setEventType(eventType.name())
+                .setOrderId(order.getId())
+                .setCustomerName(order.getCustomerName())
+                .setAmount(order.getAmount().toString())
+                .setStatus(com.demo.protobuf.order.enums.OrderStatus.ORDER_STATUS_CREATED)
+                .build();
+
+        ProtobufOutboxEvent event = new ProtobufOutboxEvent();
+        event.setAggregateType(AggregateType.ORDER);
+        event.setAggregateId(order.getId());
+        event.setEventId(UUID.randomUUID().toString());
+        event.setEventType(eventType);
+        event.setPayload(protobufEvent.toByteArray());
+        event.setCreatedAt(LocalDateTime.now());
+
+        protobufOutboxEventRepository.save(event);
     }
 }

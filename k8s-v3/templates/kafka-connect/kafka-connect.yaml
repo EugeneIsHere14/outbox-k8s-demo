@@ -24,5 +24,5 @@ spec:
     value.converter: org.apache.kafka.connect.json.JsonConverter
     value.converter.schemas.enable: false
     rest.advertised.host.name: kafka-connect
-    connector.client.config.override.policy: None
+    connector.client.config.override.policy: All
 {{- end }}
