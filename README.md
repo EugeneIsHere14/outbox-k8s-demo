@@ -275,9 +275,223 @@ Steps are the same to the previous section, but you will apply application manif
 
 ---
 
+## Protobuf Contract Module and Demo Flow
+
+This project also contains an optional Protobuf-based event flow. It is used to demonstrate how a service can publish a binary Protobuf payload through the Outbox Pattern without changing the existing JSON flow.
+
+The regular JSON flow remains unchanged:
+
+```text
+POST /orders
+  -> orders + outbox_events
+  -> Debezium JSON Outbox connector
+  -> Kafka topic: order-events
+  -> payment-service JSON consumer
+```
+
+The Protobuf demo flow is separate:
+
+```text
+POST /orders/protobuf
+  -> orders + protobuf_outbox_events
+  -> Debezium Protobuf Outbox connector
+  -> Kafka topic: order-events-protobuf
+  -> payment-service Protobuf consumer
+```
+
+### 1. Install contracts-protobuf locally
+
+The `contracts-protobuf` module contains shared `.proto` contracts and generated Java classes used by both `order-service` and `payment-service`.
+
+Before building services that depend on it, install the module into the local Maven repository:
+
+```bash
+cd contracts-protobuf
+mvn clean install
+```
+
+Expected result:
+
+```text
+~/.m2/repository/com/demo/contracts-protobuf/1.0-SNAPSHOT
+```
+
+Then build the services:
+
+```bash
+cd ../order-service
+mvn clean package -DskipTests
+
+cd ../payment-service
+mvn clean package -DskipTests
+```
+
+If the services cannot resolve `contracts-protobuf`, run `mvn clean install` in `contracts-protobuf` again and reload Maven projects in the IDE.
+
+### 2. Build and import Docker images
+
+```bash
+docker build -t order-service:1.0.0 ./order-service
+docker build -t payment-service:1.0.0 ./payment-service
+
+k3d image import order-service:1.0.0 -c demo-k8s-cluster
+k3d image import payment-service:1.0.0 -c demo-k8s-cluster
+```
+
+If Kafka Connect image was changed, rebuild and import it as well:
+
+```bash
+docker build -t kafka-connect-debezium:1.0.0 ./kafka-connect
+k3d image import kafka-connect-debezium:1.0.0 -c demo-k8s-cluster
+```
+
+### 3. Verify Kafka resources
+
+After Argo CD sync or manual deployment, check that the Protobuf topic and connector exist:
+
+```bash
+kubectl get kafkatopic -n kafka
+kubectl get kafkaconnector -n kafka
+```
+
+Expected resources:
+
+```text
+order-events-protobuf
+order-protobuf-outbox-connector
+```
+
+Check connector status:
+
+```bash
+kubectl describe kafkaconnector order-protobuf-outbox-connector -n kafka
+```
+
+If needed, inspect Kafka Connect logs:
+
+```bash
+kubectl logs -n kafka kafka-connect-connect-0 -f
+```
+
+### 4. Test Protobuf endpoint
+
+Port-forward `order-service`:
+
+```bash
+kubectl port-forward -n demo-k8s svc/order-service 8080:8080
+```
+
+Create an order through the Protobuf demo endpoint:
+
+```bash
+curl -X POST http://localhost:8080/orders/protobuf \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerName": "John Protobuf",
+    "amount": 150.50
+  }'
+```
+
+Expected HTTP response:
+
+```json
+{
+  "id": 1,
+  "customerName": "John Protobuf",
+  "amount": 150.50,
+  "status": "CREATED"
+}
+```
+
+### 5. Verify database records
+
+Port-forward Orders MySQL if needed:
+
+```bash
+kubectl port-forward -n demo-k8s svc/orders-mysql 3310:3306
+```
+
+Connect to MySQL:
+
+```bash
+mysql -h 127.0.0.1 -P 3310 -u user -p
+```
+
+Check the regular order row:
+
+```sql
+SELECT * FROM orders;
+```
+
+Check the Protobuf outbox row metadata:
+
+```sql
+SELECT id, aggregate_type, aggregate_id, event_id, event_type, created_at
+FROM protobuf_outbox_events;
+```
+
+The `payload` column is binary Protobuf data, so it is not expected to be human-readable in SQL output.
+
+### 6. Verify Kafka topic
+
+Open a console consumer:
+
+```bash
+kubectl exec -it -n kafka kafka-kafka-0 -- bash
+```
+
+```bash
+/opt/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server kafka-kafka-bootstrap:9092 \
+  --topic order-events-protobuf \
+  --from-beginning
+```
+
+The output will not look like JSON. This is expected because Protobuf is a binary format. The console consumer prints raw bytes as text.
+
+### 7. Verify payment-service logs
+
+```bash
+kubectl logs -n demo-k8s deployment/payment-service -f
+```
+
+Expected log example:
+
+```text
+Received protobuf order event. eventType=ORDER_CREATED, orderId=..., customerName=John Protobuf, amount=150.50, status=ORDER_STATUS_CREATED
+Starting protobuf payment flow for orderId=...
+```
+
+This confirms that:
+
+1. `order-service` serialized the event as Protobuf
+2. Debezium delivered the binary payload to Kafka
+3. `payment-service` deserialized the payload into a typed Protobuf `OrderEvent`
+
+### 8. Verify that the existing JSON flow still works
+
+```bash
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerName": "John JSON",
+    "amount": 99.99
+  }'
+```
+
+Expected result:
+
+```text
+POST /orders
+  -> order-events
+  -> JSON consumer in payment-service
+```
+
+The JSON and Protobuf flows should work independently.
+
 ## Important Notes
 
-Debezium snapshot mode:
+Debezium snapshot mode (order-outbox-connector only):
 
 ```json
 "snapshot.mode": "initial"
