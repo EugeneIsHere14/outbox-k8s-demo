@@ -25,4 +25,14 @@ spec:
     value.converter.schemas.enable: false
     rest.advertised.host.name: kafka-connect
     connector.client.config.override.policy: All
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 1
+  jvmOptions:
+    -Xms: 256m
+    -Xmx: 512m
 {{- end }}
