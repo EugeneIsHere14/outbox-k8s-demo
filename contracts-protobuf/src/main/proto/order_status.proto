@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package order.events;
+
+option java_package = "com.demo.protobuf.order.enums";
+option java_multiple_files = true;
+
+
+// Prefixes are not mandatory, but it is a good practice to avoid name clashes between different proto files.
+enum OrderStatus {
+  // Default value, should not be used.
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_CREATED = 1;
+  ORDER_STATUS_PAID = 2;
+  ORDER_STATUS_REJECTED = 3;
+  ORDER_STATUS_SHIPPED = 4;
+  ORDER_STATUS_DELIVERED = 5;
+}

@@ -1,4 +1,4 @@
-package com.demo.payment.consumer;
+package com.demo.payment.kafka.consumer;
 
 import com.demo.payment.dto.event.OrderEvent;
 import com.demo.payment.enums.OrderEventType;
