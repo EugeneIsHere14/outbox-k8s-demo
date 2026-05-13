@@ -90,7 +90,7 @@ orderProtobufOutboxConnector:
   ordersDatabasePort: "3306"
   ordersDatabaseUser: "user"
   ordersDatabasePassword: "pass"
-  serverId: "184055"
+  serverId: "184056"
   topicPrefix: "orders-protobuf-outbox-cdc"
   topicReplacement: "order-events-protobuf"
   keyConverter: org.apache.kafka.connect.storage.StringConverter
