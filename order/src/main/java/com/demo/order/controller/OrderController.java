@@ -2,6 +2,7 @@ package com.demo.order.controller;
 
 import com.demo.order.dto.OrderDto;
 import com.demo.order.dto.PaymentDto;
+import com.demo.order.enums.ProcessingFlow;
 import com.demo.order.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,9 @@ public class OrderController {
     }
 
     @PostMapping("/protobuf")
-    public ResponseEntity<OrderDto> createOrderWithProtobuf(@RequestBody OrderDto orderDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrderWithProtobuf(orderDto));
+    public ResponseEntity<OrderDto> createOrderWithProtobuf(@RequestParam(defaultValue = "CLASSIC") ProcessingFlow flow,
+                                                            @RequestBody OrderDto orderDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrderWithProtobuf(flow, orderDto));
     }
 
     @GetMapping("/{id}")

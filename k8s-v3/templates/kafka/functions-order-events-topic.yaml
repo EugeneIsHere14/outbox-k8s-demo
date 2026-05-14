@@ -1,0 +1,17 @@
+{{- if .Values.functionsOrderEventsKafkaTopic.enabled }}
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: {{ .Values.functionsOrderEventsKafkaTopic.name }}
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.functionsOrderEventsKafkaTopic.syncWave }}"
+spec:
+  partitions: {{ .Values.functionsOrderEventsKafkaTopic.partitions }}
+  replicas: {{ .Values.functionsOrderEventsKafkaTopic.replicas }}
+  config:
+    min.insync.replicas: 1
+    cleanup.policy: delete
+{{- end }}

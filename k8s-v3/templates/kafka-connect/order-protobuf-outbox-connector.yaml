@@ -31,11 +31,11 @@ spec:
 
     transforms: "outbox"
     transforms.outbox.type: "io.debezium.transforms.outbox.EventRouter"
-    transforms.outbox.route.topic.replacement: "{{ .Values.orderProtobufOutboxConnector.topicReplacement }}"
+    transforms.outbox.route.topic.replacement: ${routedByValue}
     transforms.outbox.table.field.event.id: "event_id"
     transforms.outbox.table.field.event.key: "aggregate_id"
     transforms.outbox.table.field.event.payload: "payload"
-    transforms.outbox.route.by.field: "aggregate_type"
+    transforms.outbox.route.by.field: "{{ .Values.orderProtobufOutboxConnector.routeByField }}"
 
     transforms.outbox.table.expand.json.payload: "false"
     key.converter: "{{ .Values.orderProtobufOutboxConnector.keyConverter }}"
