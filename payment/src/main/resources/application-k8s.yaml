@@ -9,10 +9,12 @@ spring:
       definition: orderEventDeserializer|paymentReservationProcessor|paymentEventSerializer
 
     stream:
-      bindings:
-        orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-in-0: order-events-input
-        orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-out-0: payment-events-output
+      function:
+        bindings:
+          orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-in-0: order-events-input
+          orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-out-0: payment-events-output
 
+      bindings:
         order-events-input:
           destination: order-events-functions
           content-type: application/octet-stream
@@ -36,7 +38,7 @@ spring:
           consumer-properties:
             auto.offset.reset: latest
         bindings:
-          orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-in-0:
+          order-events-input:
             consumer:
               enable-dlq: true
               dlq-name: order-events-functions-dlq
