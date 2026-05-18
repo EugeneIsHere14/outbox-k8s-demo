@@ -1,18 +1,18 @@
 syntax = "proto3";
 
-package order.events;
+package payment.events;
 
-import "order_status.proto";
+import "payment_status.proto";
 
-option java_package = "com.demo.protobuf.order.event";
+option java_package = "com.demo.protobuf.payment.event";
 option java_multiple_files = true;
 
 
-message OrderEvent {
+message PaymentEvent {
   string event_id = 1;
   string event_type = 2;
   int64 order_id = 3;
   string customer_name = 4;
   string amount = 5;
-  OrderStatus status = 6;
+  PaymentStatus status = 6;
 }

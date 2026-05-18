@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package payment.events;
+
+option java_package = "com.demo.protobuf.payment.enums";
+option java_multiple_files = true;
+
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_STATUS_PENDING = 1;
+  PAYMENT_STATUS_RESERVED = 2;
+  PAYMENT_STATUS_PROCESSED = 3;
+  PAYMENT_STATUS_ALREADY_PROCESSED = 4;
+  PAYMENT_STATUS_COMPLETED = 5;
+  PAYMENT_STATUS_REJECTED = 6;
+}
