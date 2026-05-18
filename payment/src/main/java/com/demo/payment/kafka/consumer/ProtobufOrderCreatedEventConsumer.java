@@ -1,7 +1,7 @@
 package com.demo.payment.kafka.consumer;
 
 import com.demo.payment.enums.OrderEventType;
-import com.demo.payment.mapper.ProtobufOrderStatusMapper;
+import com.demo.payment.protobuf.mapper.ProtobufOrderStatusMapper;
 import com.demo.protobuf.order.event.OrderEvent;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -16,3 +16,11 @@ CREATE TABLE IF NOT EXISTS outbox_events (
     payload TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create processed_events table for tracking processed events and ensuring idempotency
+CREATE TABLE IF NOT EXISTS processed_events (
+    event_id VARCHAR(36) PRIMARY KEY,
+    aggregate_id BIGINT NOT NULL,
+    event_type VARCHAR(100) NOT NULL,
+    processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

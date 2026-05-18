@@ -1,4 +1,4 @@
-package com.demo.payment.mapper;
+package com.demo.payment.protobuf.mapper;
 
 import com.demo.payment.enums.OrderStatus;
 import org.springframework.stereotype.Component;

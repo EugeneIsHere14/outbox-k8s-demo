@@ -97,7 +97,10 @@ public class OrderService {
     }
 
     private void saveProtobufOutboxEvent(Order order, OrderEventType eventType, ProcessingFlow flow) {
+        final String eventId = UUID.randomUUID().toString();
+
         com.demo.protobuf.order.event.OrderEvent protobufEvent = com.demo.protobuf.order.event.OrderEvent.newBuilder()
+                .setEventId(eventId)
                 .setEventType(eventType.name())
                 .setOrderId(order.getId())
                 .setCustomerName(order.getCustomerName())
@@ -108,7 +111,7 @@ public class OrderService {
         ProtobufOutboxEvent event = new ProtobufOutboxEvent();
         event.setAggregateType(AggregateType.ORDER);
         event.setAggregateId(order.getId());
-        event.setEventId(UUID.randomUUID().toString());
+        event.setEventId(eventId);
         event.setEventType(eventType);
         event.setPayload(protobufEvent.toByteArray());
         event.setTargetTopic(resolveTargetTopic(flow).getTopicName());
