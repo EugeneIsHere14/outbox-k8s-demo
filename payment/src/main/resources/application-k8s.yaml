@@ -20,11 +20,14 @@ spring:
           content-type: application/octet-stream
           group: functions-payment-group
           consumer:
-            max-attempts: 3
+            max-attempts: 1
             concurrency: 3
+            use-native-decoding: true
         payment-events-output:
           destination: payment-events-functions
           content-type: application/octet-stream
+          producer:
+            use-native-encoding: true
 
       kafka:
         binder:
@@ -49,3 +52,10 @@ server:
 app:
   kafka:
     enabled: true
+
+logging:
+  level:
+    org.apache.kafka.common.config.AbstractConfig: WARN
+    org.apache.kafka.clients.producer.ProducerConfig: WARN
+    org.apache.kafka.clients.consumer.ConsumerConfig: WARN
+    org.apache.kafka.clients.admin.AdminClientConfig: WARN

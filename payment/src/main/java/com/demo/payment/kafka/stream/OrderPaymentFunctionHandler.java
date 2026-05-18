@@ -1,8 +1,6 @@
 package com.demo.payment.kafka.stream;
 
 import com.demo.payment.dto.event.PaymentProcessingResult;
-import com.demo.payment.kafka.dto.KafkaMessageMetadata;
-import com.demo.payment.kafka.util.KafkaHeaderUtils;
 import com.demo.payment.protobuf.codec.ProtobufCodecUtils;
 import com.demo.payment.protobuf.mapper.PaymentEventMapper;
 import com.demo.payment.service.PaymentService;
@@ -11,10 +9,6 @@ import com.demo.protobuf.payment.event.PaymentEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.function.Function;
 
@@ -23,61 +17,46 @@ import java.util.function.Function;
 public class OrderPaymentFunctionHandler {
 
     @Bean
-    public Function<Message<byte[]>, Message<OrderEvent>> orderEventDeserializer() {
-        return message -> {
-            if (message == null) {
-                log.error("Retrieved message is null");
-                throw new IllegalStateException("Message cannot be null");
+    public Function<byte[], OrderEvent> orderEventDeserializer() {
+        return payload -> {
+            if (payload == null || payload.length == 0) {
+                log.error("Retrieved empty OrderEvent payload");
+                throw new IllegalStateException("OrderEvent payload cannot be empty");
             }
 
-            KafkaMessageMetadata metadata = KafkaHeaderUtils.extractMetadata(message.getHeaders());
-            log.info("Deserializing OrderEvent. topic={}, partition={}, offset={}, key={}. ", metadata.topic(),
-                    metadata.partition(), metadata.offset(), metadata.key());
+            log.info("Deserializing OrderEvent. payloadSize={}", payload.length);
 
-            return MessageBuilder
-                    .withPayload(ProtobufCodecUtils.deserializeToOrderEvent(message.getPayload()))
-                    .copyHeaders(message.getHeaders())
-                    .build();
+            return ProtobufCodecUtils.deserializeToOrderEvent(payload);
         };
     }
 
     @Bean
-    public Function<Message<OrderEvent>, Message<PaymentProcessingResult>> paymentReservationProcessor(final PaymentService paymentService) {
-        return message -> {
-            if (message == null) {
-                log.error("Retrieved message is null");
-                throw new IllegalStateException("Message cannot be null");
+    public Function<OrderEvent, PaymentProcessingResult> paymentReservationProcessor(final PaymentService paymentService) {
+        return orderEvent -> {
+            if (orderEvent == null) {
+                log.error("Retrieved OrderEvent is null");
+                throw new IllegalStateException("OrderEvent cannot be null");
             }
 
-            KafkaMessageMetadata metadata = KafkaHeaderUtils.extractMetadata(message.getHeaders());
-            log.info("Processing payment reservation. topic={}, partition={}, offset={}, key={}. ", metadata.topic(),
-                    metadata.partition(), metadata.offset(), metadata.key());
+            log.info("Processing payment reservation. orderId={}", orderEvent.getOrderId());
 
-            return MessageBuilder
-                    .withPayload(paymentService.reservePayment(message.getPayload()))
-                    .copyHeaders(message.getHeaders())
-                    .build();
+            return paymentService.reservePayment(orderEvent);
         };
     }
 
     @Bean
-    public Function<Message<PaymentProcessingResult>, Message<byte[]>> paymentEventSerializer(final PaymentEventMapper paymentEventMapper) {
-        return message -> {
-            if (message == null) {
-                log.error("Retrieved message is null");
-                throw new IllegalStateException("Message cannot be null");
+    public Function<PaymentProcessingResult, byte[]> paymentEventSerializer(final PaymentEventMapper paymentEventMapper) {
+        return paymentProcessingResult -> {
+            if (paymentProcessingResult == null) {
+                log.error("Retrieved PaymentProcessingResult is null");
+                throw new IllegalStateException("PaymentProcessingResult cannot be null");
             }
 
-            KafkaMessageMetadata metadata = KafkaHeaderUtils.extractMetadata(message.getHeaders());
-            log.info("Serializing PaymentEvent. topic={}, partition={}, offset={}, key={}. ", metadata.topic(),
-                    metadata.partition(), metadata.offset(), metadata.key());
+            log.info("Serializing PaymentEvent. orderId={}", paymentProcessingResult.orderId());
 
-            PaymentEvent paymentEvent = paymentEventMapper.toProtobuf(message.getPayload());
+            PaymentEvent paymentEvent = paymentEventMapper.toProtobuf(paymentProcessingResult);
 
-            return MessageBuilder
-                    .withPayload(ProtobufCodecUtils.serializePaymentEvent(paymentEvent))
-                    .copyHeaders(message.getHeaders())
-                    .build();
+            return ProtobufCodecUtils.serializePaymentEvent(paymentEvent);
         };
     }
 }
