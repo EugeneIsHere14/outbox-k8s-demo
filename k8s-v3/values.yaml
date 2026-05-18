@@ -65,6 +65,13 @@ functionsOrderEventsKafkaTopic:
   partitions: 3
   replicas: 1
 
+functionsPaymentEventsKafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: payment-events-functions
+  partitions: 3
+  replicas: 1
+
 snapshotCustomersKafkaTopic:
   enabled: true
   syncWave: "2"
