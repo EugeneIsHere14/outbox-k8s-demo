@@ -38,7 +38,7 @@ spring:
           consumer-properties:
             auto.offset.reset: latest
         bindings:
-          order-events-input:
+          orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-in-0:
             consumer:
               enable-dlq: true
               dlq-name: order-events-functions-dlq
