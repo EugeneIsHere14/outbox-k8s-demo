@@ -45,6 +45,14 @@ spring:
             consumer:
               enable-dlq: true
               dlq-name: order-events-functions-dlq
+              configuration:
+                key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+                value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+          payment-events-output:
+            producer:
+              configuration:
+                key.serializer: org.apache.kafka.common.serialization.StringSerializer
+                value.serializer: org.apache.kafka.common.serialization.ByteArraySerializer
 
 server:
   port: 8080
