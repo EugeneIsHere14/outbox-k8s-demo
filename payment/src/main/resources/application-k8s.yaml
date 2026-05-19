@@ -4,9 +4,66 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  cloud:
+    function:
+      definition: orderEventDeserializer|paymentReservationProcessor|paymentEventSerializer
+
+    stream:
+      function:
+        bindings:
+          orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-in-0: order-events-input
+          orderEventDeserializerpaymentReservationProcessorpaymentEventSerializer-out-0: payment-events-output
+
+      bindings:
+        order-events-input:
+          destination: order-events-functions
+          content-type: application/octet-stream
+          group: functions-payment-group
+          consumer:
+            max-attempts: 1
+            concurrency: 3
+            use-native-decoding: true
+        payment-events-output:
+          destination: payment-events-functions
+          content-type: application/octet-stream
+          producer:
+            use-native-encoding: true
+
+      kafka:
+        binder:
+          brokers: kafka-kafka-bootstrap.kafka:9092
+          auto-create-topics: false
+          required-acks: all
+          replication-factor: 1
+          min-partition-count: 3
+          configuration:
+            min.insync.replicas: 1
+          consumer-properties:
+            auto.offset.reset: latest
+        bindings:
+          order-events-input:
+            consumer:
+              enable-dlq: true
+              dlq-name: order-events-functions-dlq
+              configuration:
+                key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+                value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+          payment-events-output:
+            producer:
+              configuration:
+                key.serializer: org.apache.kafka.common.serialization.StringSerializer
+                value.serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+
 server:
   port: 8080
 
 app:
   kafka:
     enabled: true
+
+logging:
+  level:
+    org.apache.kafka.common.config.AbstractConfig: WARN
+    org.apache.kafka.clients.producer.ProducerConfig: WARN
+    org.apache.kafka.clients.consumer.ConsumerConfig: WARN
+    org.apache.kafka.clients.admin.AdminClientConfig: WARN

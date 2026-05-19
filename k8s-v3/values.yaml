@@ -58,6 +58,27 @@ protobufOrderEventsKafkaTopic:
   partitions: 1
   replicas: 1
 
+functionsOrderEventsKafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: order-events-functions
+  partitions: 3
+  replicas: 1
+
+functionsOrderEventsKafkaTopicDlq:
+  enabled: true
+  syncWave: "2"
+  name: order-events-functions-dlq
+  partitions: 3
+  replicas: 1
+
+functionsPaymentEventsKafkaTopic:
+  enabled: true
+  syncWave: "2"
+  name: payment-events-functions
+  partitions: 3
+  replicas: 1
+
 snapshotCustomersKafkaTopic:
   enabled: true
   syncWave: "2"
@@ -93,6 +114,7 @@ orderProtobufOutboxConnector:
   serverId: "184056"
   topicPrefix: "orders-protobuf-outbox-cdc"
   topicReplacement: "order-events-protobuf"
+  routeByField: "target_topic"
   keyConverter: org.apache.kafka.connect.storage.StringConverter
   valueConverter: org.apache.kafka.connect.converters.ByteArrayConverter
 

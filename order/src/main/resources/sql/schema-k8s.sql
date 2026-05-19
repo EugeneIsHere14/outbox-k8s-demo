@@ -40,5 +40,6 @@ CREATE TABLE IF NOT EXISTS protobuf_outbox_events (
     event_id VARCHAR(36) NOT NULL UNIQUE,
     event_type VARCHAR(100) NOT NULL,
     payload BLOB NOT NULL,
+    target_topic VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

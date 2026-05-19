@@ -7,9 +7,7 @@ import com.demo.order.dto.event.OrderEvent;
 import com.demo.order.entity.Order;
 import com.demo.order.entity.OutboxEvent;
 import com.demo.order.entity.ProtobufOutboxEvent;
-import com.demo.order.enums.AggregateType;
-import com.demo.order.enums.OrderEventType;
-import com.demo.order.enums.OrderStatus;
+import com.demo.order.enums.*;
 import com.demo.order.repository.OrderRepository;
 import com.demo.order.repository.OutboxEventRepository;
 import com.demo.order.repository.ProtobufOutboxEventRepository;
@@ -56,21 +54,22 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderDto createOrderWithProtobuf(OrderDto orderDto) {
+    public OrderDto createOrderWithProtobuf(ProcessingFlow flow, OrderDto orderDto) {
         Order order = new Order();
         order.setCustomerName(orderDto.customerName());
         order.setAmount(orderDto.amount());
         order.setStatus(OrderStatus.CREATED);
         Order saved = orderRepository.save(order);
 
-        saveProtobufOutboxEvent(saved, OrderEventType.ORDER_CREATED);
+        saveProtobufOutboxEvent(saved, OrderEventType.ORDER_CREATED, flow);
 
         return new OrderDto(saved.getId(), saved.getCustomerName(), saved.getAmount(), saved.getStatus());
     }
 
     public Optional<OrderDto> getOrderById(Long id) {
         return orderRepository.findById(id)
-                .map(order -> new OrderDto(order.getId(), order.getCustomerName(), order.getAmount(), order.getStatus()));
+                .map(order -> new OrderDto(order.getId(), order.getCustomerName(), order.getAmount(),
+                        order.getStatus()));
     }
 
     public Optional<PaymentDto> getPaymentByOrderId(Long id) {
@@ -97,8 +96,11 @@ public class OrderService {
         outboxEventRepository.save(event);
     }
 
-    private void saveProtobufOutboxEvent(Order order, OrderEventType eventType) {
+    private void saveProtobufOutboxEvent(Order order, OrderEventType eventType, ProcessingFlow flow) {
+        final String eventId = UUID.randomUUID().toString();
+
         com.demo.protobuf.order.event.OrderEvent protobufEvent = com.demo.protobuf.order.event.OrderEvent.newBuilder()
+                .setEventId(eventId)
                 .setEventType(eventType.name())
                 .setOrderId(order.getId())
                 .setCustomerName(order.getCustomerName())
@@ -109,11 +111,19 @@ public class OrderService {
         ProtobufOutboxEvent event = new ProtobufOutboxEvent();
         event.setAggregateType(AggregateType.ORDER);
         event.setAggregateId(order.getId());
-        event.setEventId(UUID.randomUUID().toString());
+        event.setEventId(eventId);
         event.setEventType(eventType);
         event.setPayload(protobufEvent.toByteArray());
+        event.setTargetTopic(resolveTargetTopic(flow).getTopicName());
         event.setCreatedAt(LocalDateTime.now());
 
         protobufOutboxEventRepository.save(event);
+    }
+
+    private OutboxTargetTopic resolveTargetTopic(ProcessingFlow flow) {
+        return switch (flow) {
+            case CLASSIC -> OutboxTargetTopic.ORDER_EVENTS_PROTOBUF;
+            case FUNCTIONAL -> OutboxTargetTopic.ORDER_EVENTS_FUNCTIONS;
+        };
     }
 }

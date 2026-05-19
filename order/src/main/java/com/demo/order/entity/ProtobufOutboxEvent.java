@@ -34,6 +34,9 @@ public class ProtobufOutboxEvent {
     @Column(name = "payload", nullable = false, columnDefinition = "BLOB")
     private byte[] payload;
 
+    @Column(name = "target_topic", nullable = false)
+    private String targetTopic;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }
